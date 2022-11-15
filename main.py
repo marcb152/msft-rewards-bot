@@ -8,6 +8,7 @@ import BrowserManager
 import RewardsValidator
 
 
+# TODO: Add argument '--only-rewards'
 def usage(arg_name: str = ""):
     print("Usage:\t" + arg_name + " [--headless] [--double-check]")
     print(" --headless: Launches Edge in the background, its window won't appear")
@@ -15,8 +16,7 @@ def usage(arg_name: str = ""):
     print("Made with <3 by:\n\t- Marc // PiNutStudio // marcb152")
 
 
-# TODO: Implement selenium-stealth
-# Press the green button in the gutter to run the script.
+# TODO: Add support for mobile searches
 if __name__ == '__main__':
     logging.basicConfig(filemode='w',
                         stream=sys.stdout,

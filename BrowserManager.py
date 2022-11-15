@@ -1,27 +1,37 @@
 from time import sleep
 
 from selenium import webdriver
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
-from selenium.webdriver.edge.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium_stealth import stealth
 
 import msftAuth
 
 
-def start_edge(username: str, password: str, use_headless: bool = False) -> webdriver:
-    edge_options = Options()
+def start_chrome(username: str, password: str, use_headless: bool = False) -> webdriver:
+    options = webdriver.ChromeOptions()
+    options.add_argument("start-maximized")
     if use_headless:
-        edge_options.add_argument("--headless")
-    # edge_options.add_argument("-inprivate")
-    browser = webdriver.Edge(options=edge_options)
+        options.add_argument("--headless")
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('useAutomationExtension', False)
+    browser = webdriver.Chrome(options=options)
+    stealth(browser,
+            languages=["fr-FR", "fr"],
+            vendor="Google Inc.",
+            platform="Win32",
+            webgl_vendor="Intel Inc.",
+            renderer="Intel Iris OpenGL Engine",
+            fix_hairline=True)
+    sleep(1)
     return msftAuth.login(browser, username, password)
 
 
 def start_bing(username: str, password: str, use_headless: bool = False) -> webdriver:
-    browser = start_edge(username, password, use_headless)
+    browser = start_chrome(username, password, use_headless)
     browser.get("https://www.bing.com/")
     assert "Bing" in browser.title
-    browser.maximize_window()
     sleep(2)
     # Accept/reject cookies
     WebDriverWait(browser, 5).until(lambda x: x.find_element(By.ID, "bnp_btn_reject")).click()
@@ -32,7 +42,6 @@ def start_bing(username: str, password: str, use_headless: bool = False) -> webd
 def goto_rewards(browser: webdriver) -> webdriver:
     browser.get("https://rewards.microsoft.com/")
     assert "Rewards" in browser.title
-    browser.maximize_window()
     sleep(2)
     # Accept/reject cookies
     WebDriverWait(browser, 5).until(lambda x: x.find_element(By.XPATH, "//div[@id='wcpConsentBannerCtrl']//button[1]")).click()
@@ -42,6 +51,13 @@ def goto_rewards(browser: webdriver) -> webdriver:
 
 def close_browser(browser: webdriver):
     sleep(1)
+    # Deleting cookies
     browser.delete_all_cookies()
     sleep(1)
+    # TODO: Rework clearing cache, not working properly yet
+    # Clearing cache
+    browser.get('chrome://settings/clearBrowserData')
+    browser.switch_to.window(browser.window_handles[0])
+    browser.find_element(By.XPATH, '//settings-ui').send_keys(Keys.ENTER)
+    sleep(2)
     browser.quit()
