@@ -17,7 +17,7 @@ def search(browser: webdriver, field: str):
     sleep(1)
 
 
-def start(browser: webdriver):
+def start(browser: webdriver, searches_nbr: int = 35):
     littre = []
     for line in open("littre.txt", "r"):
         line = line.replace("\n", "")
@@ -25,7 +25,7 @@ def start(browser: webdriver):
 
     # Intensive search, 1 each 2 seconds
     # 35 in total, to ensure that all the points are collected
-    for i in range(35):
+    for i in range(searches_nbr):
         try:
             search(browser, choice(littre).lower())
         except Exception as ex:

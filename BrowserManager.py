@@ -1,7 +1,6 @@
 from time import sleep
 
 from selenium import webdriver
-from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium_stealth import stealth
@@ -9,11 +8,14 @@ from selenium_stealth import stealth
 import msftAuth
 
 
-def start_chrome(username: str, password: str, use_headless: bool = False) -> webdriver:
+def start_chrome(username: str, password: str, use_headless: bool = False, mobile: bool = False) -> webdriver:
     options = webdriver.ChromeOptions()
     options.add_argument("start-maximized")
     if use_headless:
         options.add_argument("--headless")
+    if mobile:
+        options.add_argument("user-agent=Mozilla/5.0 (Linux; Android 10; Pixel 3) AppleWebKit/537.36 "
+                             "(KHTML, like Gecko) Chrome/79.0. 3945.79 Mobile Safari/537.36")
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('useAutomationExtension', False)
     browser = webdriver.Chrome(options=options)
@@ -28,8 +30,8 @@ def start_chrome(username: str, password: str, use_headless: bool = False) -> we
     return msftAuth.login(browser, username, password)
 
 
-def start_bing(username: str, password: str, use_headless: bool = False) -> webdriver:
-    browser = start_chrome(username, password, use_headless)
+def start_bing(username: str, password: str, use_headless: bool = False, mobile: bool = False) -> webdriver:
+    browser = start_chrome(username, password, use_headless=use_headless, mobile=mobile)
     browser.get("https://www.bing.com/")
     assert "Bing" in browser.title
     sleep(2)
@@ -56,8 +58,8 @@ def close_browser(browser: webdriver):
     sleep(1)
     # TODO: Rework clearing cache, not working properly yet
     # Clearing cache
-    browser.get('chrome://settings/clearBrowserData')
-    browser.switch_to.window(browser.window_handles[0])
-    browser.find_element(By.XPATH, '//settings-ui').send_keys(Keys.ENTER)
+    # browser.get('chrome://settings/clearBrowserData')
+    # browser.switch_to.window(browser.window_handles[0])
+    # browser.find_element(By.XPATH, '//settings-ui').send_keys(Keys.ENTER)
     sleep(2)
     browser.quit()
