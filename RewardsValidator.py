@@ -17,6 +17,11 @@ def save_to_desktop(rewards: list):
 
 
 def validate_reward(browser: webdriver, points: str, panel, title: str):
+    # Xbox stuff
+    if points == "5":
+        logging.info("The following reward has been validated:\n\tXBOX REWARD:" + title)
+        panel.click()
+
     # Classic reward:
     if points == "10" and "sondage" not in title.lower():
         logging.info("The following reward has been validated:\n\tCLASSIC REWARD:" + title)
@@ -48,7 +53,6 @@ def validate_reward(browser: webdriver, points: str, panel, title: str):
 
         # 8 answers-5 correct
         if "expresso" not in title.lower():
-            # XPATH = "//div[@iscorrectoption='True']//div[@class='b_hide']"
             can_continue = True
             while can_continue:
                 try:
@@ -66,7 +70,7 @@ def validate_reward(browser: webdriver, points: str, panel, title: str):
             while can_continue:
                 try:
                     for i in range(4):
-                        # TODO: what if the correct answer is the first one?
+                        # Works, even if the first answer is the correct one
                         WebDriverWait(browser, 5).until(
                             lambda x: x.find_element(By.ID, "rqAnswerOption{}".format(i))).click()
                         sleep(4)
@@ -100,6 +104,6 @@ def start(browser: webdriver):
             title = panel.get_attribute("aria-label")
             r = validate_reward(browser, points, panel, title)
             if r is not None and r != "":
-                missed_rewards.append(r)
+                missed_rewards.append(r + "\n")
     if len(missed_rewards) >= 1:
         save_to_desktop(missed_rewards)

@@ -1,13 +1,14 @@
 import argparse
+import datetime
 import logging
 import socket
 import sys
+import threading
+import time
 
 from easygui import passwordbox, enterbox
 
-import AutoSearch
-import BrowserManager
-import RewardsValidator
+import ThreadingLib
 
 
 def check_internet(host="8.8.8.8", port=53, timeout=3):
@@ -25,12 +26,14 @@ def check_internet(host="8.8.8.8", port=53, timeout=3):
         return False
 
 
+# TODO: Comment each function, make code self-documented
 if __name__ == '__main__':
     logging.basicConfig(filemode='w',
                         stream=sys.stdout,
                         level=logging.INFO,
                         force=True,
-                        format='%(asctime)s - %(levelname)s: %(module)s: %(message)s [at line %(lineno)d]')
+                        format='%(asctime)s - %(levelname)s: %(module)s (%(threadName)s): %(message)s [at line %(lineno)d]',
+                        datefmt="%H:%M:%S")
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--headless", action="store_const", const=True,
@@ -40,9 +43,13 @@ if __name__ == '__main__':
                              "only if rewards validation is enabled.")
     parser.add_argument("--only-rewards", action="store_const", const=True,
                         help="Will only check for rewards, it won't perform auto-searches.")
-    parser.add_argument("--mobile-searches", action="store_const", const=True,
+    parser.add_argument("--mobile", action="store_const", const=True,
                         help="Will perform all the mobile searches needed, won't perform any reward validation.")
+    parser.add_argument("--path", type=str,
+                        help="The path to the Chrome Driver executable.")
     args = vars(parser.parse_args())
+
+    start_time = time.time()
 
     if not check_internet():
         logging.error("No internet connection was detected, "
@@ -59,28 +66,28 @@ if __name__ == '__main__':
     assert password != "" and password is not None, "The password can't be empty!"
     logging.info("Password OK")
 
-    if args["mobile_searches"]:
-        logging.info("=====LOGGING IN (MOBILE)=====")
-        with BrowserManager.start_bing(user, password, use_headless=args["headless"], mobile=args["mobile_searches"]) as browser:
-            logging.info("=====AUTO-SEARCH STARTED (MOBILE)=====")
-            AutoSearch.start(browser, 25)
-            logging.info("=====AUTO-SEARCH ENDED (MOBILE)=====")
-            BrowserManager.close_browser(browser)
+    # THREADING
+    threads = ThreadingLib.ThreadingLib(user, password, args["headless"])
+    if args["mobile"]:
+        logging.info("Starting mobile thread...")
+        mobile_thread = threading.Thread(target=threads.start_mobile, name="MobileThread")
+        mobile_thread.start()
+    if not args["only_rewards"]:
+        logging.info("Starting desktop searches thread...")
+        desktop_thread = threading.Thread(target=threads.start_desktop, name="DesktopThread")
+        desktop_thread.start()
+    logging.info("Starting rewards thread...")
+    rewards_thread = threading.Thread(target=threads.start_rewards, name="RewardsThread", args=(args["double_check"],))
+    rewards_thread.start()
 
-    logging.info("=====LOGGING IN=====")
-    with BrowserManager.start_bing(user, password, use_headless=args["headless"]) as browser:
-        # TODO: handle bad password/bad username
-        if not args["only_rewards"]:
-            logging.info("=====AUTO-SEARCH STARTED=====")
-            AutoSearch.start(browser)
-            logging.info("=====AUTO-SEARCH ENDED=====")
-        BrowserManager.goto_rewards(browser)
-        logging.info("=====AUTO-REWARDS STARTED=====")
-        RewardsValidator.start(browser)
-        logging.info("=====AUTO-REWARDS ENDED=====")
-        if args["double_check"]:
-            BrowserManager.goto_rewards(browser)
-            logging.info("=====AUTO-REWARDS STARTED (x2)=====")
-            RewardsValidator.start(browser)
-            logging.info("=====AUTO-REWARDS ENDED (x2)=====")
-        BrowserManager.close_browser(browser)
+    # WAITING FOR THREADING
+    if args["mobile"]:
+        mobile_thread.join()
+    if not args["only_rewards"]:
+        desktop_thread.join()
+    rewards_thread.join()
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    logging.info("Total elapsed seconds: " + str(elapsed_time) +
+                 "\n\tTotal time: " + str(datetime.timedelta(seconds=elapsed_time)))

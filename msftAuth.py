@@ -12,8 +12,7 @@ def login(browser: webdriver, username: str, password: str) -> webdriver:
     browser.get("https://rewards.bing.com/Signout")
     sleep(1)
     WebDriverWait(browser, 5).until(lambda x: "bienvenue" in x.title.lower())
-    # Login
-    browser.get("https://login.live.com")
+    browser.get("https://login.live.com/login.srf?wa=wsignin1.0&wreply=https%3a%2f%2fwww.bing.com%2fsecure%2fPassport.aspx&wp=MBI_SSL")
     sleep(1)
     WebDriverWait(browser, 5).until(lambda x: "connecter" in x.title.lower())
     # Auth using username and password
@@ -30,7 +29,7 @@ def login(browser: webdriver, username: str, password: str) -> webdriver:
     except:
         logging.info("No validation required")
     sleep(1)
-    WebDriverWait(browser, 5).until(lambda x: "compte microsoft" in x.title.lower())
+    WebDriverWait(browser, 5).until(lambda x: "bing" in x.title.lower())
 
     return browser
 
