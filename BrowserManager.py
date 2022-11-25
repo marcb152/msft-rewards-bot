@@ -9,6 +9,15 @@ import msftAuth
 
 
 def start_chrome(username: str, password: str, use_headless: bool = False, mobile: bool = False, path: str = "") -> webdriver:
+    """
+    This function starts a Chrome WebDriver instance connected to Bing
+    :param username: Username of the used Microsoft account
+    :param password: Password of the used Microsoft account
+    :param use_headless: Launches Chrome in the background if True (=invisible)
+    :param mobile: Launches Chrome as mobile Chrome if True
+    :param path: Path to the Google Chrome WebDriver executable
+    :return: Returns the WebDriver/browser instance newly created and connected to the Microsoft account
+    """
     options = webdriver.ChromeOptions()
     options.add_argument("start-maximized")
     if use_headless:
@@ -35,27 +44,46 @@ def start_chrome(username: str, password: str, use_headless: bool = False, mobil
 
 
 def start_bing(username: str, password: str, use_headless: bool = False, mobile: bool = False, path: str = "") -> webdriver:
+    """
+    This function starts Chrome, logins the user and goes to bing.com
+    :param username: Username of the used Microsoft account
+    :param password: Password of the used Microsoft account
+    :param use_headless: Launches Chrome in the background if True (=invisible)
+    :param mobile: Launches Chrome as mobile Chrome if True
+    :param path: Path to the Google Chrome WebDriver executable
+    :return: Returns the WebDriver/browser instance newly created and connected to the Microsoft account
+    """
     browser = start_chrome(username, password, use_headless=use_headless, mobile=mobile, path=path)
     browser.get("https://www.bing.com/")
     assert "Bing" in browser.title
     sleep(2)
-    # Accept/reject cookies
+    # Reject cookies
     WebDriverWait(browser, 5).until(lambda x: x.find_element(By.ID, "bnp_btn_reject")).click()
     sleep(1)
     return browser
 
 
 def goto_rewards(browser: webdriver) -> webdriver:
+    """
+    This function goes to the Rewards website and clears cookies
+    :param browser: The WebDriver/browser instance to use
+    :return: Returns the same WebDriver/browser instance as provided
+    """
     browser.get("https://rewards.bing.com/")
     assert "Rewards" in browser.title
     sleep(2)
     # Accept/reject cookies
-    WebDriverWait(browser, 5).until(lambda x: x.find_element(By.XPATH, "//div[@id='wcpConsentBannerCtrl']//button[1]")).click()
+    WebDriverWait(browser, 5).until(
+        lambda x: x.find_element(By.XPATH, "//div[@id='wcpConsentBannerCtrl']//button[1]")).click()
     sleep(1)
     return browser
 
 
 def close_browser(browser: webdriver):
+    """
+    This function closes the provided WebDriver/browser instance
+    :param browser: The WebDriver/browser instance to close
+    """
     sleep(1)
     # Deleting cookies
     browser.delete_all_cookies()

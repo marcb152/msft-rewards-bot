@@ -10,13 +10,25 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 
 def save_to_desktop(rewards: list):
+    """
+    Writes all the unvalidated rewards inside a text file placed on the user's Desktop
+    :param rewards: List of strings containing all the not validated rewards
+    """
     desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
-    file = open(desktop + "/NotValidatedRewards" + datetime.today().strftime('%d%m%Y') + ".txt", 'w')
-    file.writelines(rewards)
-    file.close()
+    with open(desktop + "/NotValidatedRewards" + datetime.today().strftime('%d%m%Y') + ".txt", 'w') as file:
+        file.writelines(rewards)
+        file.close()
 
 
-def validate_reward(browser: webdriver, points: str, panel, title: str):
+def validate_reward(browser: webdriver, points: str, panel, title: str) -> str:
+    """
+    This function validates rewards corresponding to their category
+    :param browser: The WebDriver/browser instance to use
+    :param points: The number of points of this reward
+    :param panel: The panel containing the reward information
+    :param title: The title of the reward
+    :return: Returns a reward that wasn't validated, if any
+    """
     # Xbox stuff
     if points == "5":
         logging.info("The following reward has been validated:\n\tXBOX REWARD:" + title)
@@ -89,16 +101,21 @@ def validate_reward(browser: webdriver, points: str, panel, title: str):
 
     sleep(4)
     browser.switch_to.window(browser.window_handles[0])
+    return ""
 
 
 def start(browser: webdriver):
+    """
+    This function performs logic to gather and start rewards validation
+    :param browser: The WebDriver/browser instance to use
+    """
     missed_rewards = []
-    # Find rewards elements
+    # Find rewards elements using their number of points
     rewards = WebDriverWait(browser, 5).\
         until(lambda x: x.find_elements(By.XPATH, "//span[@ng-if='$ctrl.pointsString']"))
     for t in rewards:
+        # We find rewards to validate using the little orange-ish 'plus' icon
         if t.find_element(By.XPATH, "parent::div//span[1]").get_attribute("class") == "mee-icon mee-icon-AddMedium":
-            # print("Reward detected: ", t.text, " points")
             points = t.text
             panel = t.find_element(By.XPATH, "ancestor::a")
             title = panel.get_attribute("aria-label")

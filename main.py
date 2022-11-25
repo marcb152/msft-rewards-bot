@@ -16,6 +16,7 @@ def check_internet(host="8.8.8.8", port=53, timeout=3):
     Host: 8.8.8.8 (google-public-dns-a.google.com)
     OpenPort: 53/tcp
     Service: domain (DNS/TCP)
+    (Code from StackOverflow)
     """
     try:
         socket.setdefaulttimeout(timeout)
@@ -26,7 +27,6 @@ def check_internet(host="8.8.8.8", port=53, timeout=3):
         return False
 
 
-# TODO: Comment each function, make code self-documented
 if __name__ == '__main__':
     logging.basicConfig(filemode='w',
                         stream=sys.stdout,
@@ -67,17 +67,17 @@ if __name__ == '__main__':
     logging.info("Password OK")
 
     # THREADING
-    threads = ThreadingLib.ThreadingLib(user, password, args["headless"])
+    threads = ThreadingLib.ThreadingLib(user, password, use_headless=args["headless"], path=args["path"])
+    mobile_thread = threading.Thread(target=threads.start_mobile, name="MobileThread")
+    desktop_thread = threading.Thread(target=threads.start_desktop, name="DesktopThread")
+    rewards_thread = threading.Thread(target=threads.start_rewards, name="RewardsThread", args=(args["double_check"],))
     if args["mobile"]:
         logging.info("Starting mobile thread...")
-        mobile_thread = threading.Thread(target=threads.start_mobile, name="MobileThread")
         mobile_thread.start()
     if not args["only_rewards"]:
         logging.info("Starting desktop searches thread...")
-        desktop_thread = threading.Thread(target=threads.start_desktop, name="DesktopThread")
         desktop_thread.start()
     logging.info("Starting rewards thread...")
-    rewards_thread = threading.Thread(target=threads.start_rewards, name="RewardsThread", args=(args["double_check"],))
     rewards_thread.start()
 
     # WAITING FOR THREADING

@@ -6,23 +6,42 @@ import RewardsValidator
 
 
 class ThreadingLib:
-    def __init__(self, user: str, password: str, use_headless: bool):
+    """
+    This class is used in order to launch Threads easily by passing all the parameters before starting the threads
+    """
+    def __init__(self, user: str, password: str, use_headless: bool = False, path: str = ""):
+        """
+        Constructor of the ThreadingLib class
+        :param user: Username of the used Microsoft account
+        :param password: Password of the used Microsoft account
+        :param use_headless: Launches Chrome in the background if True (=invisible)
+        :param path: Path to the Google Chrome WebDriver executable
+        """
         self.user = user
         self.password = password
         self.use_headless = use_headless
+        self.path = path
 
     def start_mobile(self):
+        """
+        Function used to perform the logic in order to start mobile searches
+        """
         logging.info("=====LOGGING IN (MOBILE)=====")
-        with BrowserManager.start_bing(self.user, self.password, use_headless=self.use_headless, mobile=True) as browser:
+        with BrowserManager.start_bing(
+                self.user, self.password, use_headless=self.use_headless, mobile=True, path=self.path) as browser:
             logging.info("=====AUTO-SEARCH STARTED (MOBILE)=====")
             AutoSearch.start(browser, 25)
             logging.info("=====AUTO-SEARCH ENDED (MOBILE)=====")
             BrowserManager.close_browser(browser)
-            return
 
     def start_rewards(self, double_check: bool = False):
+        """
+        Function used to perform the logic in order to start rewards validation
+        :param double_check: Argument used to check for rewards twice
+        """
         logging.info("=====LOGGING IN=====")
-        with BrowserManager.start_bing(self.user, self.password, use_headless=self.use_headless) as browser:
+        with BrowserManager.start_chrome(
+                self.user, self.password, use_headless=self.use_headless, path=self.path) as browser:
             # TODO: handle bad password/bad username
             BrowserManager.goto_rewards(browser)
             logging.info("=====AUTO-REWARDS STARTED=====")
@@ -34,13 +53,15 @@ class ThreadingLib:
                 RewardsValidator.start(browser)
                 logging.info("=====AUTO-REWARDS ENDED (x2)=====")
             BrowserManager.close_browser(browser)
-            return
 
     def start_desktop(self):
+        """
+        Function used to perform the logic in order to start desktop searches
+        """
         logging.info("=====LOGGING IN=====")
-        with BrowserManager.start_bing(self.user, self.password, use_headless=self.use_headless) as browser:
+        with BrowserManager.start_bing(
+                self.user, self.password, use_headless=self.use_headless, path=self.path) as browser:
             logging.info("=====AUTO-SEARCH STARTED=====")
             AutoSearch.start(browser)
             logging.info("=====AUTO-SEARCH ENDED=====")
             BrowserManager.close_browser(browser)
-            return
