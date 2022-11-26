@@ -27,6 +27,7 @@ def check_internet(host="8.8.8.8", port=53, timeout=3):
         return False
 
 
+# TODO: Rework logging in order to authorize only my code to send output (to get rid of all the annoying warnings)
 if __name__ == '__main__':
     logging.basicConfig(filemode='w',
                         stream=sys.stdout,
@@ -45,6 +46,8 @@ if __name__ == '__main__':
                         help="Will only check for rewards, it won't perform auto-searches.")
     parser.add_argument("--mobile", action="store_const", const=True,
                         help="Will perform all the mobile searches needed, won't perform any reward validation.")
+    parser.add_argument("--write-to-desktop", action="store_const", const=True,
+                        help="Will create a text file on your Desktop listing all the rewards that have not been validated.")
     parser.add_argument("--path", type=str,
                         help="The path to the Chrome Driver executable.")
     args = vars(parser.parse_args())
@@ -70,7 +73,8 @@ if __name__ == '__main__':
     threads = ThreadingLib.ThreadingLib(user, password, use_headless=args["headless"], path=args["path"])
     mobile_thread = threading.Thread(target=threads.start_mobile, name="MobileThread")
     desktop_thread = threading.Thread(target=threads.start_desktop, name="DesktopThread")
-    rewards_thread = threading.Thread(target=threads.start_rewards, name="RewardsThread", args=(args["double_check"],))
+    rewards_thread = threading.Thread(target=threads.start_rewards, name="RewardsThread",
+                                      args=(args["double_check"], args["write_to_desktop"],))
     if args["mobile"]:
         logging.info("Starting mobile thread...")
         mobile_thread.start()

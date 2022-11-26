@@ -104,9 +104,10 @@ def validate_reward(browser: webdriver, points: str, panel, title: str) -> str:
     return ""
 
 
-def start(browser: webdriver):
+def start(browser: webdriver, write_to_desktop: bool = False):
     """
     This function performs logic to gather and start rewards validation
+    :param write_to_desktop: Do we write a list of all the rewards that have not been validated
     :param browser: The WebDriver/browser instance to use
     """
     missed_rewards = []
@@ -122,5 +123,5 @@ def start(browser: webdriver):
             r = validate_reward(browser, points, panel, title)
             if r is not None and r != "":
                 missed_rewards.append(r + "\n")
-    if len(missed_rewards) >= 1:
+    if len(missed_rewards) >= 1 and write_to_desktop:
         save_to_desktop(missed_rewards)

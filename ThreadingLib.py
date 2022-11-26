@@ -34,9 +34,10 @@ class ThreadingLib:
             logging.info("=====AUTO-SEARCH ENDED (MOBILE)=====")
             BrowserManager.close_browser(browser)
 
-    def start_rewards(self, double_check: bool = False):
+    def start_rewards(self, double_check: bool = False, write_to_desktop: bool = False):
         """
         Function used to perform the logic in order to start rewards validation
+        :param write_to_desktop: Do we write a list of all the rewards that have not been validated
         :param double_check: Argument used to check for rewards twice
         """
         logging.info("=====LOGGING IN=====")
@@ -45,7 +46,7 @@ class ThreadingLib:
             # TODO: handle bad password/bad username
             BrowserManager.goto_rewards(browser)
             logging.info("=====AUTO-REWARDS STARTED=====")
-            RewardsValidator.start(browser)
+            RewardsValidator.start(browser, write_to_desktop=write_to_desktop)
             logging.info("=====AUTO-REWARDS ENDED=====")
             if double_check:
                 BrowserManager.goto_rewards(browser)

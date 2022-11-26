@@ -26,7 +26,7 @@ def start_chrome(username: str, password: str, use_headless: bool = False, mobil
         options.add_argument("user-agent=Mozilla/5.0 (Linux; Android 10; Pixel 3) AppleWebKit/537.36 "
                              "(KHTML, like Gecko) Chrome/79.0. 3945.79 Mobile Safari/537.36")
         options.add_experimental_option("mobileEmulation", {"deviceName": "Pixel 3"})
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
     options.add_experimental_option('useAutomationExtension', False)
     if path is not None and path != "":
         browser = webdriver.Chrome(options=options, executable_path=path)
