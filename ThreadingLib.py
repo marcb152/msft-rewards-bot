@@ -41,7 +41,7 @@ class ThreadingLib:
         :param double_check: Argument used to check for rewards twice
         """
         logging.info("=====LOGGING IN=====")
-        with BrowserManager.start_chrome(
+        with BrowserManager.start_bing(
                 self.user, self.password, use_headless=self.use_headless, path=self.path) as browser:
             # TODO: handle bad password/bad username
             BrowserManager.goto_rewards(browser)

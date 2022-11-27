@@ -1,6 +1,6 @@
 import argparse
 import datetime
-import logging
+import logging.config
 import socket
 import sys
 import threading
@@ -27,8 +27,12 @@ def check_internet(host="8.8.8.8", port=53, timeout=3):
         return False
 
 
-# TODO: Rework logging in order to authorize only my code to send output (to get rid of all the annoying warnings)
 if __name__ == '__main__':
+
+    logging.config.dictConfig({
+        'version': 1,
+        'disable_existing_loggers': True,
+    })
     logging.basicConfig(filemode='w',
                         stream=sys.stdout,
                         level=logging.INFO,
