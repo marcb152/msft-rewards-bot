@@ -16,7 +16,7 @@ def save_to_desktop(rewards: list):
     """
     desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
     with open(desktop + "/NotValidatedRewards" + datetime.today().strftime('%d%m%Y') + ".txt", 'w') as file:
-        file.writelines(rewards)
+        file.writelines(file.readlines() + rewards)
         file.close()
 
 
@@ -35,7 +35,7 @@ def validate_reward(browser: webdriver, points: str, panel, title: str) -> str:
         panel.click()
 
     # Classic reward:
-    if points == "10" and "sondage" not in title.lower():
+    elif points == "10" and "sondage" not in title.lower():
         logging.info("The following reward has been validated:\n\tCLASSIC REWARD:" + title)
         panel.click()
 

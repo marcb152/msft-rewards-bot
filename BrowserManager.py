@@ -1,3 +1,4 @@
+import threading
 from time import sleep
 
 from selenium import webdriver
@@ -8,11 +9,14 @@ from selenium_stealth import stealth
 import msftAuth
 
 
-def start_chrome(username: str, password: str, use_headless: bool = False, mobile: bool = False, path: str = "") -> webdriver:
+def start_chrome(username: str, password: str, e: threading.Event, code: list, use_headless: bool = False,
+                 mobile: bool = False, path: str = "") -> webdriver:
     """
     This function starts a Chrome WebDriver instance connected to Bing
     :param username: Username of the used Microsoft account
     :param password: Password of the used Microsoft account
+    :param e: Event fired if 2FA is detected as enabled
+    :param code: The 2FA code to log in into the accounts
     :param use_headless: Launches Chrome in the background if True (=invisible)
     :param mobile: Launches Chrome as mobile Chrome if True
     :param path: Path to the Google Chrome WebDriver executable
@@ -40,20 +44,23 @@ def start_chrome(username: str, password: str, use_headless: bool = False, mobil
             renderer="Intel Iris OpenGL Engine",
             fix_hairline=True)
     sleep(1)
-    return msftAuth.login(browser, username, password)
+    return msftAuth.login(browser, username, password, e, code)
 
 
-def start_bing(username: str, password: str, use_headless: bool = False, mobile: bool = False, path: str = "") -> webdriver:
+def start_bing(username: str, password: str, e: threading.Event, code: list, use_headless: bool = False,
+               mobile: bool = False, path: str = "") -> webdriver:
     """
     This function starts Chrome, logins the user and goes to bing.com
     :param username: Username of the used Microsoft account
     :param password: Password of the used Microsoft account
+    :param e: Event fired if 2FA is detected as enabled
+    :param code: The 2FA code to log in into the accounts
     :param use_headless: Launches Chrome in the background if True (=invisible)
     :param mobile: Launches Chrome as mobile Chrome if True
     :param path: Path to the Google Chrome WebDriver executable
     :return: Returns the WebDriver/browser instance newly created and connected to the Microsoft account
     """
-    browser = start_chrome(username, password, use_headless=use_headless, mobile=mobile, path=path)
+    browser = start_chrome(username, password, e, code, use_headless=use_headless, mobile=mobile, path=path)
     browser.get("https://www.bing.com/")
     assert "Bing" in browser.title
     sleep(2)
@@ -84,14 +91,16 @@ def close_browser(browser: webdriver):
     This function closes the provided WebDriver/browser instance
     :param browser: The WebDriver/browser instance to close
     """
+    # Logout, might cause issues to the others running instances
+    browser.get("https://rewards.bing.com/Signout")
     sleep(1)
     # Deleting cookies
     browser.delete_all_cookies()
     # TODO: Rework clearing cache, not working properly yet
-    # sleep(1)
     # Clearing cache
-    # browser.get('chrome://settings/clearBrowserData')
+    # sleep(1)
     # browser.switch_to.window(browser.window_handles[0])
-    # browser.find_element(By.XPATH, '//settings-ui').send_keys(Keys.ENTER)
+    # browser.get('chrome://settings/clearBrowserData')
+    # WebDriverWait(browser, 1).until(lambda x: x.find_element(By.XPATH, '//settings-ui').send_keys(Keys.ENTER))
     sleep(1)
     browser.quit()

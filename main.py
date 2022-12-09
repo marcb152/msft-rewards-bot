@@ -74,7 +74,8 @@ if __name__ == '__main__':
     logging.info("Password OK")
 
     # THREADING
-    threads = ThreadingLib.ThreadingLib(user, password, use_headless=args["headless"], path=args["path"])
+    e = threading.Event()
+    threads = ThreadingLib.ThreadingLib(user, password, e, use_headless=args["headless"], path=args["path"])
     mobile_thread = threading.Thread(target=threads.start_mobile, name="MobileThread")
     desktop_thread = threading.Thread(target=threads.start_desktop, name="DesktopThread")
     rewards_thread = threading.Thread(target=threads.start_rewards, name="RewardsThread",
@@ -87,6 +88,15 @@ if __name__ == '__main__':
         desktop_thread.start()
     logging.info("Starting rewards thread...")
     rewards_thread.start()
+
+    # Waiting for 2FA feedback, 20 seconds timeout
+    e.wait(20)
+    if e.is_set():
+        # The user has 30 seconds to provide the correct 2FA code (or the code will crash)
+        code = enterbox("Enter 2FA code:", "User auth credentials")
+        assert code != "" and code is not None, "The 2FA code can't be empty!"
+        logging.info("2FA code OK")
+        threads.send_2fa_code(code)
 
     # WAITING FOR THREADING
     if args["mobile"]:
