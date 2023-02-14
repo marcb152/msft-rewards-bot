@@ -15,8 +15,8 @@ def save_to_desktop(rewards: list):
     :param rewards: List of strings containing all the not validated rewards
     """
     desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
-    with open(desktop + "/NotValidatedRewards" + datetime.today().strftime('%d%m%Y') + ".txt", 'w') as file:
-        file.writelines(file.readlines() + rewards)
+    with open(desktop + "\\NotValidatedRewards" + datetime.today().strftime('%d%m%Y') + ".txt", 'w') as file:
+        file.writelines(rewards)
         file.close()
 
 

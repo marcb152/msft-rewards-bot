@@ -41,18 +41,20 @@ if __name__ == '__main__':
                         datefmt="%H:%M:%S")
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--headless", action="store_const", const=True,
+    parser.add_argument("-l", "--headless", action="store_const", const=True,
                         help="Launches Chrome in the background, its window won't appear.")
-    parser.add_argument("--double-check", action="store_const", const=True,
+    parser.add_argument("-d", "--double-check", action="store_const", const=True,
                         help="Will check 2 times for rewards, in case something wasn't correctly validated,"
                              "only if rewards validation is enabled.")
-    parser.add_argument("--only-rewards", action="store_const", const=True,
+    parser.add_argument("-o", "--only-rewards", action="store_const", const=True,
                         help="Will only check for rewards, it won't perform auto-searches.")
-    parser.add_argument("--mobile", action="store_const", const=True,
+    parser.add_argument("-m", "--mobile", action="store_const", const=True,
                         help="Will perform all the mobile searches needed, won't perform any reward validation.")
-    parser.add_argument("--write-to-desktop", action="store_const", const=True,
+    parser.add_argument("-w", "--write-to-desktop", action="store_const", const=True,
                         help="Will create a text file on your Desktop listing all the rewards that have not been validated.")
-    parser.add_argument("--path", type=str,
+    parser.add_argument("-i", "--incognito", action="store_const", const=True,
+                        help="Launches Chrome in private mode.")
+    parser.add_argument("-p", "--path", type=str,
                         help="The path to the Chrome Driver executable.")
     args = vars(parser.parse_args())
 
@@ -75,7 +77,7 @@ if __name__ == '__main__':
 
     # THREADING
     e = threading.Event()
-    threads = ThreadingLib.ThreadingLib(user, password, e, use_headless=args["headless"], path=args["path"])
+    threads = ThreadingLib.ThreadingLib(user, password, e, incognito=args["incognito"], use_headless=args["headless"], path=args["path"])
     mobile_thread = threading.Thread(target=threads.start_mobile, name="MobileThread")
     desktop_thread = threading.Thread(target=threads.start_desktop, name="DesktopThread")
     rewards_thread = threading.Thread(target=threads.start_rewards, name="RewardsThread",
@@ -92,10 +94,10 @@ if __name__ == '__main__':
     # Waiting for 2FA feedback, 20 seconds timeout
     e.wait(20)
     if e.is_set():
+        logging.info("2FA was detected!")
         # The user has 30 seconds to provide the correct 2FA code (or the code will crash)
         code = enterbox("Enter 2FA code:", "User auth credentials")
         assert code != "" and code is not None, "The 2FA code can't be empty!"
-        logging.info("2FA code OK")
         threads.send_2fa_code(code)
 
     # WAITING FOR THREADING

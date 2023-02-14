@@ -10,7 +10,7 @@ import msftAuth
 
 
 def start_chrome(username: str, password: str, e: threading.Event, code: list, use_headless: bool = False,
-                 mobile: bool = False, path: str = "") -> webdriver:
+                 incognito: bool = False, mobile: bool = False, path: str = "") -> webdriver:
     """
     This function starts a Chrome WebDriver instance connected to Bing
     :param username: Username of the used Microsoft account
@@ -18,12 +18,15 @@ def start_chrome(username: str, password: str, e: threading.Event, code: list, u
     :param e: Event fired if 2FA is detected as enabled
     :param code: The 2FA code to log in into the accounts
     :param use_headless: Launches Chrome in the background if True (=invisible)
+    :param incognito: Launches Chrome in private mode
     :param mobile: Launches Chrome as mobile Chrome if True
     :param path: Path to the Google Chrome WebDriver executable
     :return: Returns the WebDriver/browser instance newly created and connected to the Microsoft account
     """
     options = webdriver.ChromeOptions()
     options.add_argument("start-maximized")
+    if incognito:
+        options.add_argument("--incognito")
     if use_headless:
         options.add_argument("--headless")
     if mobile:
@@ -48,7 +51,7 @@ def start_chrome(username: str, password: str, e: threading.Event, code: list, u
 
 
 def start_bing(username: str, password: str, e: threading.Event, code: list, use_headless: bool = False,
-               mobile: bool = False, path: str = "") -> webdriver:
+               incognito: bool = False, mobile: bool = False, path: str = "") -> webdriver:
     """
     This function starts Chrome, logins the user and goes to bing.com
     :param username: Username of the used Microsoft account
@@ -56,11 +59,12 @@ def start_bing(username: str, password: str, e: threading.Event, code: list, use
     :param e: Event fired if 2FA is detected as enabled
     :param code: The 2FA code to log in into the accounts
     :param use_headless: Launches Chrome in the background if True (=invisible)
+    :param incognito: Launches Chrome in private mode
     :param mobile: Launches Chrome as mobile Chrome if True
     :param path: Path to the Google Chrome WebDriver executable
     :return: Returns the WebDriver/browser instance newly created and connected to the Microsoft account
     """
-    browser = start_chrome(username, password, e, code, use_headless=use_headless, mobile=mobile, path=path)
+    browser = start_chrome(username, password, e, code, incognito=incognito, use_headless=use_headless, mobile=mobile, path=path)
     browser.get("https://www.bing.com/")
     assert "Bing" in browser.title
     sleep(2)
@@ -77,6 +81,7 @@ def goto_rewards(browser: webdriver) -> webdriver:
     :return: Returns the same WebDriver/browser instance as provided
     """
     browser.get("https://rewards.bing.com/")
+    sleep(1)
     assert "Rewards" in browser.title
     sleep(2)
     # Accept/reject cookies
@@ -92,7 +97,7 @@ def close_browser(browser: webdriver):
     :param browser: The WebDriver/browser instance to close
     """
     # Logout, might cause issues to the others running instances
-    browser.get("https://rewards.bing.com/Signout")
+    # browser.get("https://rewards.bing.com/Signout")
     sleep(1)
     # Deleting cookies
     browser.delete_all_cookies()
