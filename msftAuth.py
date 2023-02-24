@@ -21,12 +21,14 @@ def login(browser: webdriver, username: str, password: str, e: threading.Event, 
     :return: Returns the connected WebDriver/browser instance
     """
     # Logout
-    browser.get("https://rewards.bing.com/Signout")
+    browser.get("https://bing.com/Signout")
     sleep(1)
-    WebDriverWait(browser, 5).until(lambda x: "bienvenue" in x.title.lower())
+
+    # This will redirect us to Bing
+    WebDriverWait(browser, 5).until(lambda x: "bing" in x.title.lower())
     browser.get("https://login.live.com/login.srf?wa=wsignin1.0&wreply=https%3a%2f%2fwww.bing.com%2fsecure%2fPassport.aspx&wp=MBI_SSL")
     sleep(1)
-    WebDriverWait(browser, 5).until(lambda x: "connecter" in x.title.lower())
+    WebDriverWait(browser, 5).until(lambda x: "login.live.com" in x.current_url)
 
     # Authenticate using provided username and password
     try:
@@ -60,6 +62,7 @@ def login(browser: webdriver, username: str, password: str, e: threading.Event, 
     except TimeoutException:
         logging.info("2FA not enabled")
 
+    # TODO: Remove hardcoded french words
     WebDriverWait(browser, 5).until(lambda x: "compte microsoft" in x.title.lower())
     # Validating "stay connected? -> NO"
     try:
@@ -70,4 +73,3 @@ def login(browser: webdriver, username: str, password: str, e: threading.Event, 
     WebDriverWait(browser, 5).until(lambda x: "bing" in x.title.lower())
 
     return browser
-
