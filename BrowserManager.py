@@ -66,7 +66,7 @@ def start_bing(username: str, password: str, e: threading.Event, code: list, use
     """
     browser = start_chrome(username, password, e, code, incognito=incognito, use_headless=use_headless, mobile=mobile, path=path)
     browser.get("https://www.bing.com/")
-    assert "Bing" in browser.title
+    assert "bing" in browser.title.lower()
     sleep(2)
     # Reject cookies
     WebDriverWait(browser, 5).until(lambda x: x.find_element(By.ID, "bnp_btn_reject")).click()
@@ -81,9 +81,9 @@ def goto_rewards(browser: webdriver) -> webdriver:
     :return: Returns the same WebDriver/browser instance as provided
     """
     browser.get("https://rewards.bing.com/")
-    sleep(1)
+    sleep(3)
     assert "Rewards" in browser.title
-    sleep(2)
+    sleep(1)
     # Accept/reject cookies
     WebDriverWait(browser, 5).until(
         lambda x: x.find_element(By.XPATH, "//div[@id='wcpConsentBannerCtrl']//button[1]")).click()

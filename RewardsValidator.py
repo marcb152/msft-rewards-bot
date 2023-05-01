@@ -33,11 +33,15 @@ def validate_reward(browser: webdriver, points: str, panel, title: str) -> str:
     if points == "5":
         logging.info("The following reward has been validated:\n\tXBOX REWARD:" + title)
         panel.click()
+        sleep(3)
+        browser.switch_to.window(browser.window_handles[-1])
 
     # Classic reward:
     elif points == "10" and "sondage" not in title.lower():
         logging.info("The following reward has been validated:\n\tCLASSIC REWARD:" + title)
         panel.click()
+        sleep(3)
+        browser.switch_to.window(browser.window_handles[-1])
 
     # 2 answers survey:
     elif points == "10" and "sondage" in title.lower():
